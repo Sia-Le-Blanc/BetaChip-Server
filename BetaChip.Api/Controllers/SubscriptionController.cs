@@ -9,14 +9,11 @@ namespace BetaChip.Api.Controllers
     {
         private readonly SubscriptionService _subscriptionService;
 
-        // 생성자: 서버가 시작될 때 만들어둔 SubscriptionService를 가져옵니다.
         public SubscriptionController(SubscriptionService subscriptionService)
         {
             _subscriptionService = subscriptionService;
         }
 
-        // 유저 ID로 구독 정보를 조회하는 API
-        // 예: GET http://localhost:5020/api/subscription/4e222613-7a83-4063-b717-d7e06bed0122
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSubscription(string id)
         {
@@ -27,7 +24,14 @@ namespace BetaChip.Api.Controllers
                 return NotFound(new { message = "해당 유저의 구독 정보를 찾을 수 없습니다." });
             }
 
-            return Ok(subscription);
+            // ★ 수정된 부분: BaseModel의 내부 정보를 제외하고 필요한 필드만 새 객체로 만들어 반환합니다.
+            return Ok(new {
+                id = subscription.Id,
+                email = subscription.Email,
+                tier = subscription.Tier,
+                hwid = subscription.Hwid,
+                expiresAt = subscription.ExpiresAt
+            });
         }
     }
 }
