@@ -3,7 +3,8 @@ using BetaChip.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Cloudtype 환경에서 포트 설정 읽기 (기본값 8080)
+// 1. 클라우드타입 포트 설정 (매우 중요)
+// 클라우드타입은 PORT 환경 변수를 통해 포트를 지정합니다. 기본값은 8080입니다.
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
@@ -12,7 +13,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Supabase 클라이언트 등록
+// 2. Supabase 클라이언트 등록
+// appsettings.json 또는 클라우드타입 환경 변수에서 설정을 읽어옵니다.
 builder.Services.AddScoped(_ => 
 {
     var url = builder.Configuration["SupabaseUrl"];
@@ -20,7 +22,7 @@ builder.Services.AddScoped(_ =>
     
     if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(key))
     {
-        throw new InvalidOperationException("Supabase 설정(Url/Key)이 환경 변수에 등록되지 않았습니다.");
+        throw new InvalidOperationException("SupabaseUrl 또는 SupabaseKey 설정이 없습니다. 환경 변수를 확인하세요.");
     }
 
     return new Supabase.Client(url, key, new SupabaseOptions
@@ -34,14 +36,15 @@ builder.Services.AddScoped<SubscriptionService>();
 
 var app = builder.Build();
 
-// 개발 환경에서만 Swagger 사용
+// Swagger 설정 (개발 환경 확인)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// 중요: Cloudtype에서는 SSL이 외부에서 처리되므로 이 라인은 주석 처리하거나 제거합니다.
+// 3. HTTPS 리다이렉션 제거 (중요)
+// 클라우드타입 자체에서 SSL(HTTPS)을 처리하므로, 코드에서는 중복 리다이렉션을 막기 위해 주석 처리합니다.
 // app.UseHttpsRedirection(); 
 
 app.UseAuthorization();
