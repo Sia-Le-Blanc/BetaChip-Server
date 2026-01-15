@@ -1,9 +1,8 @@
 using Postgrest.Attributes;
 using Postgrest.Models;
 
-namespace BetaChip.Api.Models
+namespace BetaChip.Functions.Models // 네임스페이스 통일
 {
-    // Supabase의 "subscriptions" 테이블과 연결
     [Table("subscriptions")]
     public class Subscription : BaseModel
     {

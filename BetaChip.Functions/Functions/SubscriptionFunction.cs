@@ -1,5 +1,5 @@
 using System.Net;
-using BetaChip.Functions.Models;
+using BetaChip.Functions.Services; // 서비스 참조 추가
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -17,7 +17,6 @@ namespace BetaChip.Functions
             _logger = loggerFactory.CreateLogger<SubscriptionFunction>();
         }
 
-        // GET https://<앱이름>.azurewebsites.net/api/subscription/{id}
         [Function("GetSubscription")]
         public async Task<HttpResponseData> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "subscription/{id}")] HttpRequestData req,
@@ -35,7 +34,6 @@ namespace BetaChip.Functions
             }
 
             var okResponse = req.CreateResponse(HttpStatusCode.OK);
-            // JSON 직렬화 에러 방지를 위해 필요한 데이터만 담은 객체 반환
             await okResponse.WriteAsJsonAsync(new
             {
                 id = subscription.Id,
