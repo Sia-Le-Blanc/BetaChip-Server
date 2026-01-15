@@ -1,0 +1,9 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+        "SupabaseUrl": "https://xaluqgpnhfdpxkgqomil.supabase.co",
+        "SupabaseKey": "sb_secret_CPfMomuQewVMfIeLAL_7mw_D8AHrz1P"
+    }
+}
