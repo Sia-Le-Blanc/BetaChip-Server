@@ -1,5 +1,5 @@
 using System.Net;
-using BetaChip.Api.Services;
+using BetaChip.Functions.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
