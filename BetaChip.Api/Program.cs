@@ -1,42 +1,50 @@
 using Supabase;
-using BetaChip.Api.Services; // 네임스페이스 추가 확인
+using BetaChip.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Supabase 설정 정보 읽기
-var supabaseUrl = builder.Configuration["Supabase:Url"] 
-    ?? throw new InvalidOperationException("Supabase URL이 설정되지 않았습니다.");
+// [핵심] 클라우드타입 환경 설정: 포트 번호를 환경 변수에서 읽어오고 0.0.0.0으로 바인딩합니다.
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-var supabaseKey = builder.Configuration["Supabase:Key"] 
-    ?? throw new InvalidOperationException("Supabase Key가 설정되지 않았습니다.");
-
-// 2. Supabase 클라이언트 등록
-builder.Services.AddScoped(_ => new Supabase.Client(supabaseUrl, supabaseKey, new SupabaseOptions
-{
-    AutoRefreshToken = true,
-    AutoConnectRealtime = true
-}));
-
-builder.Services.AddScoped<SubscriptionService>(); 
-
-// 3. API 컨트롤러 및 도구 설정
+// 서비스 등록
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Supabase 클라이언트 등록 (환경 변수에서 보안 정보를 읽어옵니다.)
+builder.Services.AddScoped(_ => 
+{
+    var url = builder.Configuration["SupabaseUrl"];
+    var key = builder.Configuration["SupabaseKey"];
+    
+    if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(key))
+    {
+        throw new InvalidOperationException("SupabaseUrl 또는 SupabaseKey가 설정되지 않았습니다. 클라우드타입 환경 변수를 확인하세요.");
+    }
+
+    return new Supabase.Client(url, key, new SupabaseOptions
+    {
+        AutoRefreshToken = true,
+        AutoConnectRealtime = true
+    });
+});
+
+builder.Services.AddScoped<SubscriptionService>();
+
 var app = builder.Build();
 
-// 4. HTTP 요청 파이프라인 설정
-// 개발 환경(Development)에서만 Swagger(API 테스트 화면)를 활성화합니다.
+// Swagger 설정 (필요 시)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// [주의] 클라우드타입은 자체적으로 HTTPS를 지원하므로, 코드 내 리다이렉션은 비활성화합니다.
+// app.UseHttpsRedirection(); 
 
-// 우리가 만들 로그인/구독 확인 API 컨트롤러들을 연결합니다.
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
